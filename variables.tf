@@ -1,14 +1,14 @@
 # Definimos las variables para no hardcodear todo si es posible
 variable "vpc_id" {
-  default = "vpc-01df9585efc0ea059"
+  default = "vpc-0258bccb3effe2eb0"
 }
 
 variable "subnet_id" {
-  default = "subnet-0d611864eb142dfec"
+  default = "subnet-0323b4e6e5a5b5a54"
 }
 
 variable "subnet_id_2" {
-  default = "subnet-0a6329af9a75bf7ff"
+  default = "subnet-07dfc764220cfe961"
 }
 
 variable "ami_id" {

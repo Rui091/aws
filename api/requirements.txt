@@ -3,3 +3,4 @@ uvicorn
 pika
 psycopg2-binary
 boto3
+

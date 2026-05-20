@@ -17,18 +17,18 @@ sudo usermod -aG docker ec2-user
 APP_DIR="/home/ec2-user/app"
 REPO_URL="https://github.com/Rui091/aws.git"
 
-if [ -d "${APP_DIR}/.git" ]; then
-  sudo -u ec2-user git -C "${APP_DIR}" fetch --all
-  if ! sudo -u ec2-user git -C "${APP_DIR}" pull --ff-only; then
-    sudo rm -rf "${APP_DIR}"
-    sudo -u ec2-user git clone "${REPO_URL}" "${APP_DIR}"
+if [ -d "$APP_DIR/.git" ]; then
+  sudo -u ec2-user git -C "$APP_DIR" fetch --all
+  if ! sudo -u ec2-user git -C "$APP_DIR" pull --ff-only; then
+    sudo rm -rf "$APP_DIR"
+    sudo -u ec2-user git clone "$REPO_URL" "$APP_DIR"
   fi
 else
-  sudo rm -rf "${APP_DIR}"
-  sudo -u ec2-user git clone "${REPO_URL}" "${APP_DIR}"
+  sudo rm -rf "$APP_DIR"
+  sudo -u ec2-user git clone "$REPO_URL" "$APP_DIR"
 fi
 
-cd "${APP_DIR}/api"
+cd "$APP_DIR/api"
 
 # 3. Build y run del contenedor inyectando variables de entorno
 if sudo docker ps -a --format '{{.Names}}' | grep -q '^fast-api$'; then

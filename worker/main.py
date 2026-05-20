@@ -5,7 +5,7 @@ Async Worker
 Consume mensajes de RabbitMQ y actualiza el estado de las tareas en PostgreSQL.
 
 Flujo:
-  1. Lee las IPs de RabbitMQ y PostgreSQL desde AWS Parameter Store (SSM).
+    1. Lee las IPs de RabbitMQ y PostgreSQL desde variables de entorno (Docker).
   2. Se conecta a RabbitMQ y se queda escuchando la cola 'tasks'.
   3. Por cada mensaje recibido:
      - 'create_task' -> crea/actualiza el registro en PostgreSQL con status 'completed'
@@ -16,6 +16,7 @@ import json
 import time
 import logging
 import sys
+import os
 
 import pika
 import psycopg2
@@ -48,23 +49,10 @@ POSTGRES_USER     = "admin"
 POSTGRES_PASSWORD = "password123"
 
 # ---------------------------------------------------------------------------
-# Helper: obtener IPs desde AWS Parameter Store
+# IPs inyectadas a través de variables de entorno (Docker)
 # ---------------------------------------------------------------------------
-def get_ssm_parameter(name: str, default: str) -> str:
-    """Lee un parámetro de AWS SSM Parameter Store.
-    Si falla (permisos, sin conexión, etc.) devuelve el valor por defecto."""
-    try:
-        import boto3
-        from botocore.exceptions import ClientError
-
-        client = boto3.client("ssm", region_name="us-east-1")
-        response = client.get_parameter(Name=name)
-        value = response["Parameter"]["Value"]
-        log.info(f"[SSM] {name} = {value}")
-        return value
-    except Exception as e:
-        log.warning(f"[SSM] No se pudo obtener '{name}': {e}. Usando default='{default}'")
-        return default
+RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", RABBITMQ_DEFAULT_HOST)
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST", POSTGRES_DEFAULT_HOST)
 
 
 # ---------------------------------------------------------------------------
@@ -200,15 +188,9 @@ def connect_rabbitmq(host: str, retries: int = 10, delay: int = 5) -> pika.Block
 # Main
 # ---------------------------------------------------------------------------
 def main():
-    # 1. Obtener IPs desde Parameter Store
-    rabbitmq_host = get_ssm_parameter(
-        "/message-queue/dev/rabbitmq/public_ip",
-        RABBITMQ_DEFAULT_HOST,
-    )
-    postgres_host = get_ssm_parameter(
-        "/message-queue/dev/postgres/public_ip",
-        POSTGRES_DEFAULT_HOST,
-    )
+    # 1. Obtener IPs desde Variables de Entorno (Docker)
+    rabbitmq_host = RABBITMQ_HOST
+    postgres_host = POSTGRES_HOST
 
     # 2. Asegurar que las tablas existen
     ensure_tables(postgres_host)

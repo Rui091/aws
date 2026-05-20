@@ -49,10 +49,11 @@ POSTGRES_PASSWORD = "password123"
 
 
 # ---------------------------------------------------------------------------
-# FIX 1: IPs inyectadas dinámicamente vía Terraform templatefile()
+# FIX 1: IPs inyectadas a través de variables de entorno (Docker)
 # ---------------------------------------------------------------------------
-PG_HOST       = "${postgres_ip}"
-RABBITMQ_HOST = "${rabbitmq_ip}"
+import os
+PG_HOST       = os.environ.get("POSTGRES_HOST", "localhost")
+RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST", "localhost")
 
 
 # ---------------------------------------------------------------------------
